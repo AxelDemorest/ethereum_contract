@@ -3,17 +3,19 @@ import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 describe("Crowdsale", function () {
+
+    // Adresse fictive d'un contrat ERC20
+    const token = "0x1234567890123456789012345678901234567890";
+    // Prix du token
+    const tokenPrice = ethers.parseUnits("0.001", "ether");
+    // Moment d'ouverture de la levée de fonds
+    const openingTime = Math.floor(Date.now() / 1000);
+    // Moment de fermeture de la levée de fonds
+    const closingTime = openingTime + 86400;
+
+
     async function deployContract() {
         const [owner] = await ethers.getSigners();
-
-        // Adresse fictive d'un contrat ERC20
-        const token = "0x1234567890123456789012345678901234567890";
-        // Prix du token
-        const tokenPrice = ethers.parseUnits("0.001", "ether");
-        // Moment d'ouverture de la levée de fonds
-        const openingTime = Math.floor(Date.now() / 1000);
-        // Moment de fermeture de la levée de fonds
-        const closingTime = openingTime + 86400;
 
         const Crowdsale = await ethers.getContractFactory("CrowdSale");
         const crowdsale = await Crowdsale.deploy(token, tokenPrice, openingTime, closingTime, owner.getAddress());
@@ -42,8 +44,10 @@ describe("Crowdsale", function () {
 
         // Obtenez le solde du propriétaire
         const ownerBalance = await pornCoin.balanceOf(owner.getAddress());
+        
+        pornCoin.transfer(crowdsale, "1");
 
-
+        expect(crowdsale).to.equal(1);
 
     });
 });

@@ -35,19 +35,13 @@ contract CrowdSale is Ownable {
     }
 
     // Fonction permettant à un utilisateur d'acheter des tokens en échange d'Ether
-    function purchaseTokens(uint256 tokenAmount) external payable onlyWhileOpen {
-        require(tokenAmount > 0, "montant > 0"); // Vérifie que l'acheteur a envoyé au moins 1 token
-        require(msg.value >= tokenAmount * tokenPrice, "Montant Ether insuffisant"); // Vérifie que l'acheteur a envoyé assez d'Ether
-        // msg.value est le montant d'Ether envoyé par l'acheteur
-
+    function purchaseTokens() external payable onlyWhileOpen {
         // Calcule le coût en Ether
-        uint256 cost = tokenAmount * tokenPrice;
+        uint256 tokenAmount = msg.value * tokenPrice;
 
         // Transfère les tokens à l'acheteur
         token.transfer(msg.sender, tokenAmount);
 
-        // Transfère l'Ether au propriétaire
-        payable(owner()).transfer(cost);
     }
 
     // Fonction permettant au propriétaire de récupérer les eithers restants
