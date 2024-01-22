@@ -1,4 +1,4 @@
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -9,28 +9,34 @@ contract CrowdSale is Ownable {
     uint256 public openingTime; // Moment de l'ouverture de la levée de fond
     uint256 public closingTime; // Moment de la fermeture de la levée de fond
 
-    constructor(ERC20 _token, uint256 _tokenPrice, uint256 _openingTime, uint256 _closingTime) {
-        token = _token; // Définition de l'adresse du token ERC20
-        tokenPrice = _tokenPrice; // Définition du prix du token
-        openingTime = _openingTime; // Définition du moment de début de la levée de fonds
-        closingTime = _closingTime; // Définition du moment de fin de la levée de fonds
+    constructor(
+        ERC20 _token,
+        uint256 _tokenPrice,
+        uint256 _openingTime,
+        uint256 _closingTime,
+        address _initialOwner // Adresse du propriétaire initial
+    ) Ownable(_initialOwner) { // Appel du constructeur de Ownable avec l'adresse du propriétaire initial
+        token = _token;
+        tokenPrice = _tokenPrice;
+        openingTime = _openingTime;
+        closingTime = _closingTime;
     }
 
     // Événement déclenché lorsqu'un utilisateur achète des tokens
     modifier onlyWhileOpen {
-        require(block.timestamp >= openingTime && block.timestamp <= closingTime, "La levée de fond n'est pas ouverte");
+        require(block.timestamp >= openingTime && block.timestamp <= closingTime, "La levee de fonds n'est pas terminee");
         _;
     }
 
     // Événement déclenché lorsqu'un utilisateur achète des tokens
     modifier onlyWhileClosed {
-        require(block.timestamp > closingTime, "La levée de fond n'est pas terminée");
+        require(block.timestamp > closingTime, "La levee de fonds n'est pas terminee");
         _;
     }
 
     // Fonction permettant à un utilisateur d'acheter des tokens en échange d'Ether
     function purchaseTokens(uint256 tokenAmount) external payable onlyWhileOpen {
-        require(tokenAmount > 0, "Le montant de tokens doit être supérieur à zéro"); // Vérifie que l'acheteur a envoyé au moins 1 token
+        require(tokenAmount > 0, "montant > 0"); // Vérifie que l'acheteur a envoyé au moins 1 token
         require(msg.value >= tokenAmount * tokenPrice, "Montant Ether insuffisant"); // Vérifie que l'acheteur a envoyé assez d'Ether
         // msg.value est le montant d'Ether envoyé par l'acheteur
 

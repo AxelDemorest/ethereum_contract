@@ -4,15 +4,25 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 describe("Crowdsale", function () {
     async function deployContract() {
-        const [owner, otherAccount] = await ethers.getSigners();
+        const [owner] = await ethers.getSigners();
+
         const Crowdsale = await ethers.getContractFactory("Crowdsale");
         const crowdsale = await Crowdsale.deploy();
 
-        return { crowdsale, owner, otherAccount };
+        const PornCoin = await ethers.getContractFactory("PornCoin");
+        const pornCoin = await PornCoin.deploy();
+
+        return { crowdsale, owner, pornCoin };
     }
 
-    it("Should purchase tokens", async function () {
-        const { crowdsale, owner, otherAccount } = await loadFixture(deployContract);
+    it("Should verify exact number of MTK", async function () {
+        const { crowdsale, owner, pornCoin } = await loadFixture(deployContract);
 
+        // Obtenez le solde de l'adresse du contrat PornCoin
+        const contractBalance = await pornCoin.balanceOf(owner.getAddress());
+
+        const expectedBalance = ethers.parseUnits("1000000000", "ether");
+
+        expect(contractBalance).to.equal(expectedBalance);
     });
 });
