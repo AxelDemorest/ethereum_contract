@@ -10,6 +10,7 @@ contract CrowdSale is Ownable {
     uint256 public tokenPrice;
     uint256 public openingTime; // Moment de l'ouverture de la levée de fond
     uint256 public closingTime; // Moment de la fermeture de la levée de fond
+    bool public isClosed = true;
 
     constructor(
         PornCoin _token,
@@ -27,23 +28,28 @@ contract CrowdSale is Ownable {
         return token.balanceOf(address(this));
     }
 
+    function setIsClosed(bool _isClosed) public onlyOwner {
+        isClosed = _isClosed;
+    }
+
     // Événement déclenché lorsqu'un utilisateur achète des tokens
     modifier onlyWhileOpen {
-        require(block.timestamp >= openingTime && block.timestamp <= closingTime, "La levee de fonds n'est pas terminee");
+        require((block.timestamp >= openingTime && block.timestamp <= closingTime) || !isClosed, "La levee de fonds n'est pas ouverte");
         _;
     }
 
     // Événement déclenché lorsqu'un utilisateur achète des tokens
     modifier onlyWhileClosed {
-        require(block.timestamp > closingTime, "La levee de fonds n'est pas terminee");
+        require((block.timestamp > closingTime) || isClosed, "La levee de fonds n'est pas terminee");
         _;
     }
 
     // Fonction permettant à un utilisateur d'acheter des tokens en échange d'Ether
     function purchaseTokens() external payable onlyWhileOpen {
-        // Calcule le coût en Ether
+        require(msg.value > 0, "Vous devez envoyer de l'Ether pour acheter des tokens");
         uint256 tokenAmount = msg.value * tokenPrice;
-        // Transfère les tokens à l'acheteur
+        require(token.balanceOf(address(this)) >= tokenAmount, "Le contrat n'a pas suffisamment de tokens");
+
         token.transfer(msg.sender, tokenAmount);
     }
 
@@ -55,5 +61,9 @@ contract CrowdSale is Ownable {
     // Fonction permettant au propriétaire de récupérer les tokens restants
     function withdrawTokens() external onlyOwner onlyWhileClosed {
         token.transfer(owner(), token.balanceOf(address(this))); // Transfère les tokens au propriétaire
+    }
+
+    function setClosingTime(uint256 _closingTime) external onlyOwner {
+        closingTime = _closingTime;
     }
 }
